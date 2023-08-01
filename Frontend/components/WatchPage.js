@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
-import { Video } from "expo-av"; // Import the Video component from Expo
+import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { Video } from "expo-av";
 import axios from "axios";
+import { Dimensions } from "react-native";
+
+const { width, height } = Dimensions.get("window");
 
 const WatchPage = () => {
   const [videoFeed, setVideoFeed] = useState([]);
@@ -32,21 +29,17 @@ const WatchPage = () => {
     // Play the next video when the current video ends
     setCurrentIndex((prevIndex) => (prevIndex + 1) % videoFeed.length);
   };
-
   return (
     <ScrollView style={styles.container}>
       {videoFeed.map((video) => (
-        // setting the ket to the video id to without any warnings and tracking of the video issues
+        // setting the key to the video id to avoid any warnings and tracking of the video issues
         <View key={video.id} style={styles.videoContainer}>
           {currentIndex === videoFeed.indexOf(video) && (
-            <TouchableOpacity
-              activeOpacity={1}
-              onPress={() => handleVideoEnd()}
-            >
+            <View style={styles.videoWrapper}>
               <Video
                 source={{ uri: video.videoUrl }}
                 shouldPlay
-                resizeMode="contain"
+                resizeMode="cover" // Use "cover" to fill the entire video container
                 style={styles.video}
                 isLooping={false}
                 onPlaybackStatusUpdate={(status) => {
@@ -55,15 +48,19 @@ const WatchPage = () => {
                   }
                 }}
               />
-            </TouchableOpacity>
+              <View style={styles.textOverlay}>
+                <Text style={styles.videoTitle}>{video.title}</Text>
+                <Text style={styles.username}>Username: {video.createdBy}</Text>
+              </View>
+            </View>
           )}
-          <Text style={styles.videoTitle}>{video.title}</Text>
-          <Text style={styles.username}>Username: {video.createdBy}</Text>
         </View>
       ))}
     </ScrollView>
   );
 };
+
+const videoHeight = height - 64; // Adjust this value to account for the height of the navigation bar
 
 const styles = StyleSheet.create({
   container: {
@@ -73,19 +70,40 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
+    width, // Use screen width for the video container
+    height: videoHeight, // Set a fixed height for the video container
+  },
+  videoWrapper: {
+    width,
+    height: videoHeight, // Set a fixed height for the video container
+    aspectRatio: width / videoHeight, // Maintain the aspect ratio of the video
+    overflow: "hidden", // Hide any content that overflows the container
+    position: "relative",
   },
   video: {
-    width: 300,
-    height: 200,
+    flex: 1,
+  },
+  textOverlay: {
+    position: "absolute",
+    bottom: 20, // Adjust this value to position the text above the navigation bar
+    left: 20,
+    right: 20,
   },
   videoTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: "bold",
-    marginTop: 10,
+    color: "#000",
+    textShadowColor: "rgba(255, 255, 255, 0.7)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   username: {
-    fontSize: 16,
-    color: "#666",
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#000",
+    textShadowColor: "rgba(255, 255, 255, 0.7)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
 });
 
