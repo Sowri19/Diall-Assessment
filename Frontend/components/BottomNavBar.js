@@ -30,8 +30,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "black", // Set the background color to black
     height: 90, // Increase the height to make it taller
-    borderTopWidth: 1,
-    borderTopColor: "#dddddd",
   },
   tab: {
     flex: 1,

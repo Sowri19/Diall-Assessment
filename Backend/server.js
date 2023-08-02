@@ -9,7 +9,7 @@ const upload = multer();
 // Initialize Firebase Admin SDK
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  storageBucket: "gs://diallassessment.appspot.com",
+  storageBucket: "gs://dia-123.appspot.com",
 });
 
 const app = express();
