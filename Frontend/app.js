@@ -1,19 +1,15 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
-import HomeScreen from "./screens/HomeScreen";
+import { NavigationContainer } from "@react-navigation/native";
+import TabNavigator from "./TabNavigation";
+import { Video } from "expo-av";
+import VideoScreen from "./components/VideoScreen";
 
 const App = () => {
   return (
-    <View style={styles.container}>
-      <HomeScreen />
-    </View>
+    <NavigationContainer>
+      <VideoScreen />
+    </NavigationContainer>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
 
 export default App;

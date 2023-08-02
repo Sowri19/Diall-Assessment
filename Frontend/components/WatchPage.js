@@ -1,21 +1,15 @@
-import React, { useEffect, useState, useRef } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  PanResponder,
-  Animated,
-} from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, Animated, Dimensions } from "react-native";
 import { Video } from "expo-av";
 import axios from "axios";
-import { Dimensions } from "react-native";
+import { SwiperFlatList } from "react-native-swiper-flatlist";
 
 const { width, height } = Dimensions.get("window");
 
 const WatchPage = () => {
   const [videoFeed, setVideoFeed] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const bottomTabBarHeight = 79; // Replace this with the actual height of your custom bottom tab bar
 
   useEffect(() => {
     const fetchVideoFeed = async () => {
@@ -37,132 +31,57 @@ const WatchPage = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % videoFeed.length);
   };
 
-  const pan = new Animated.ValueXY();
-  const scrollViewRef = useRef(null);
-
-  const panResponder = PanResponder.create({
-    onMoveShouldSetPanResponder: (_, gestureState) => {
-      // Allow horizontal and vertical swipes
-      return Math.abs(gestureState.dx) > 10 || Math.abs(gestureState.dy) > 10;
-    },
-    onPanResponderMove: (_, gestureState) => {
-      pan.setValue({ x: gestureState.dx, y: gestureState.dy });
-    },
-    onPanResponderRelease: (_, gestureState) => {
-      if (Math.abs(gestureState.dx) < 10 && Math.abs(gestureState.dy) < 10) {
-        // Tap detected, handle it if needed
-        return;
-      }
-
-      if (Math.abs(gestureState.dy) > Math.abs(gestureState.dx)) {
-        // Vertical swipe detected
-        if (gestureState.dy < -100) {
-          // Swipe up threshold reached, move to the next video
-          handleVideoEnd();
-        }
-      }
-
-      // Animated the video card back to its original position after the swipe
-      Animated.spring(pan, {
-        toValue: { x: 0, y: 0 },
-        useNativeDriver: false,
-      }).start();
-    },
-    onPanResponderGrant: () => {
-      pan.setOffset({ x: 0, y: pan.y._value });
-      pan.setValue({ x: 0, y: 0 });
-    },
-  });
-
-  const scrollToNextCard = () => {
-    if (scrollViewRef.current) {
-      scrollViewRef.current.scrollTo({
-        x: 0,
-        y: currentIndex * height,
-        animated: true,
-      });
-    }
-  };
+  const videoHeight = height - bottomTabBarHeight; // Calculate the height of the video container
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        style={styles.scrollView} // Added this style to set the background color
-        contentContainerStyle={styles.scrollContent}
-        {...panResponder.panHandlers}
-        showsVerticalScrollIndicator={false} // Removed scroll indicator
-        ref={scrollViewRef}
-        onScrollEndDrag={scrollToNextCard}
-        scrollEventThrottle={1}
-        snapToInterval={height}
-        decelerationRate="fast"
-      >
-        {videoFeed.map((video, index) => {
-          const isCurrentIndex = currentIndex === index;
-
-          // Calculate the top position for the current video
-          const videoTop = index === currentIndex ? pan.y : height;
-
-          return (
-            <View key={video.id} style={styles.videoContainer}>
+      <SwiperFlatList
+        index={currentIndex}
+        onChangeIndex={({ index }) => setCurrentIndex(index)}
+        data={videoFeed}
+        renderItem={({ item }) => (
+          <View style={{ ...styles.videoContainer, height: videoHeight }}>
+            <Video
+              source={{ uri: item.videoUrl }}
+              shouldPlay={currentIndex === item.id}
+              resizeMode="cover"
+              style={styles.video}
+              isLooping={false}
+              onPlaybackStatusUpdate={(status) => {
+                if (status.didJustFinish) {
+                  handleVideoEnd();
+                }
+              }}
+            />
+            {currentIndex === item.id && ( // Only show the text overlay for the current video
               <Animated.View
                 style={[
-                  styles.videoWrapper,
+                  styles.textOverlay,
                   {
-                    top: videoTop,
-                    zIndex: isCurrentIndex ? 1 : 0,
+                    opacity: new Animated.Value(1),
                   },
                 ]}
               >
-                <Video
-                  source={{ uri: video.videoUrl }}
-                  shouldPlay
-                  resizeMode="cover"
-                  style={styles.video}
-                  isLooping={false}
-                  onPlaybackStatusUpdate={(status) => {
-                    if (status.didJustFinish) {
-                      handleVideoEnd();
-                    }
-                  }}
-                />
-                {index === currentIndex && ( // Only show the text overlay for the current video
-                  <Animated.View
-                    style={[
-                      styles.textOverlay,
-                      {
-                        opacity: pan.y.interpolate({
-                          inputRange: [-height, 0, height],
-                          outputRange: [0.5, 1, 0.5],
-                        }),
-                      },
-                    ]}
-                  >
-                    <Text style={styles.videoTitle}>{video.title}</Text>
-                    <Text style={styles.username}>
-                      Username: {video.createdBy}
-                    </Text>
-                  </Animated.View>
-                )}
+                <Text style={styles.videoTitle}>{item.title}</Text>
+                <Text style={styles.username}>Username: {item.createdBy}</Text>
               </Animated.View>
-            </View>
-          );
-        })}
-      </ScrollView>
+            )}
+          </View>
+        )}
+        keyExtractor={(item) => item.id.toString()}
+        style={styles.container}
+        contentContainerStyle={styles.scrollContent}
+        vertical={true}
+        showPagination={false}
+      />
     </View>
   );
 };
 
-const videoHeight = height - 84; // Adjusted this value to account for the height of the navigation bar
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff", // fixed the background color here as well
-  },
-  scrollView: {
-    flex: 1,
-    backgroundColor: "#fff", // fixed the background color here as well
+    backgroundColor: "#fff",
   },
   scrollContent: {
     flexGrow: 1,
@@ -170,25 +89,14 @@ const styles = StyleSheet.create({
   videoContainer: {
     justifyContent: "center",
     alignItems: "center",
-    height: height,
-  },
-  videoWrapper: {
-    width,
-    height: videoHeight,
-    aspectRatio: width / videoHeight,
-    overflow: "hidden",
-    position: "absolute",
   },
   video: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
+    width,
+    aspectRatio: width / (height - 79), // Adjusted this value to account for the height of the bottom tab bar
   },
   textOverlay: {
     position: "absolute",
-    bottom: 50, // Adjust this value as needed to position the text above the navigation bar
+    bottom: 50,
     left: 20,
     right: 20,
   },
