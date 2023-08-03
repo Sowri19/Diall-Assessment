@@ -1,5 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Animated, Dimensions } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Animated,
+  Dimensions,
+  TouchableOpacity,
+} from "react-native";
 import { Video } from "expo-av";
 import axios from "axios";
 import { SwiperFlatList } from "react-native-swiper-flatlist";
@@ -9,7 +16,9 @@ const { width, height } = Dimensions.get("window");
 const WatchPage = () => {
   const [videoFeed, setVideoFeed] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   const bottomTabBarHeight = 79; // Replace this with the actual height of your custom bottom tab bar
+  const videoRef = useRef(null);
 
   useEffect(() => {
     const fetchVideoFeed = async () => {
@@ -17,7 +26,6 @@ const WatchPage = () => {
         // Fetch the video feed data from the backend API using axios
         const response = await axios.get("http://localhost:3000/api/videos");
         setVideoFeed(response.data);
-        console.log(response.data); // Verify that videoFeed is populated correctly in console.log
       } catch (error) {
         console.error("Error fetching video feed:", error);
       }
@@ -31,7 +39,19 @@ const WatchPage = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % videoFeed.length);
   };
 
+  const handleVideoPress = () => {
+    // Toggle video playback on tap
+    setIsPaused((prevIsPaused) => !prevIsPaused);
+  };
+
   const videoHeight = height - bottomTabBarHeight; // Calculate the height of the video container
+
+  useEffect(() => {
+    // Autoplay the first video when the component mounts
+    if (videoRef.current) {
+      videoRef.current.playAsync();
+    }
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -42,8 +62,9 @@ const WatchPage = () => {
         renderItem={({ item }) => (
           <View style={{ ...styles.videoContainer, height: videoHeight }}>
             <Video
+              ref={videoRef}
               source={{ uri: item.videoUrl }}
-              shouldPlay={currentIndex === item.id}
+              shouldPlay={currentIndex === item.id && !isPaused}
               resizeMode="cover"
               style={styles.video}
               isLooping={false}
@@ -53,18 +74,13 @@ const WatchPage = () => {
                 }
               }}
             />
-            {currentIndex === item.id && ( // Only show the text overlay for the current video
-              <Animated.View
-                style={[
-                  styles.textOverlay,
-                  {
-                    opacity: new Animated.Value(1),
-                  },
-                ]}
+            {currentIndex === item.id && (
+              <TouchableOpacity
+                onPress={handleVideoPress}
+                style={styles.overlay}
               >
-                <Text style={styles.videoTitle}>{item.title}</Text>
-                <Text style={styles.username}>Username: {item.createdBy}</Text>
-              </Animated.View>
+                {isPaused && <Text style={styles.playButton}>Play</Text>}
+              </TouchableOpacity>
             )}
           </View>
         )}
@@ -94,27 +110,15 @@ const styles = StyleSheet.create({
     width,
     aspectRatio: width / (height - 79), // Adjusted this value to account for the height of the bottom tab bar
   },
-  textOverlay: {
-    position: "absolute",
-    bottom: 50,
-    left: 20,
-    right: 20,
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
-  videoTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#000",
-    textShadowColor: "rgba(255, 255, 255, 0.7)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-  username: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#000",
-    textShadowColor: "rgba(255, 255, 255, 0.7)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+  playButton: {
+    fontSize: 24,
+    color: "#fff",
   },
 });
 
