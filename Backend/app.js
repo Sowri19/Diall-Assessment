@@ -18,9 +18,11 @@ app.use(cors());
 
 // Importing the routes
 const userRoutes = require("./api/routes/userRoutes");
+const videoRoutes = require("./api/routes/videoRoutes");
 
 // Use the userRoutes for user-related endpoints
 app.use("/api/users", userRoutes);
+app.use("/api/videos", videoRoutes);
 
 // Error handling middleware
 app.use((error, req, res, next) => {
