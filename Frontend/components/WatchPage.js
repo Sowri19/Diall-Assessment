@@ -3,9 +3,9 @@ import {
   View,
   Text,
   StyleSheet,
-  Animated,
   Dimensions,
   TouchableOpacity,
+  Share,
 } from "react-native";
 import { Video } from "expo-av";
 import axios from "axios";
@@ -16,72 +16,86 @@ const { width, height } = Dimensions.get("window");
 const WatchPage = () => {
   const [videoFeed, setVideoFeed] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
   const bottomTabBarHeight = 79; // Replace this with the actual height of your custom bottom tab bar
   const videoRef = useRef(null);
+  const lastLoggedIndexRef = useRef(currentIndex);
 
+  // This loads all the videos in the array when the component is rendered
   useEffect(() => {
     const fetchVideoFeed = async () => {
       try {
-        // Fetch the video feed data from the backend API using axios
         const response = await axios.get("http://localhost:3000/api/videos");
         setVideoFeed(response.data);
       } catch (error) {
         console.error("Error fetching video feed:", error);
       }
     };
-
     fetchVideoFeed();
   }, []);
 
-  const handleVideoEnd = () => {
-    // Play the next video when the current video ends
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % videoFeed.length);
-  };
+  // Pause the video when the user swipes to a different video
+  const handleSwipe = ({ index }) => {
+    setCurrentIndex(index); // SwiperFlatList automatically updates the currentIndex when the user swipes
 
-  const handleVideoPress = () => {
-    // Toggle video playback on tap
-    setIsPaused((prevIsPaused) => !prevIsPaused);
-  };
-
-  const videoHeight = height - bottomTabBarHeight; // Calculate the height of the video container
-
-  useEffect(() => {
-    // Autoplay the first video when the component mounts
-    if (videoRef.current) {
-      videoRef.current.playAsync();
+    // Log the current index when it changes
+    if (index !== lastLoggedIndexRef.current) {
+      console.log("Current Index:", index);
+      lastLoggedIndexRef.current = index;
     }
-  }, []);
+  };
+
+  // Calculate the height of the video container
+  const videoHeight = height - bottomTabBarHeight;
+
+  // Function to handle the share button press
+  const handleSharePress = async (videoUrl) => {
+    try {
+      await Share.share({
+        message: videoUrl,
+      });
+    } catch (error) {
+      console.error("Error sharing video:", error);
+    }
+  };
 
   return (
     <View style={styles.container}>
       <SwiperFlatList
         index={currentIndex}
-        onChangeIndex={({ index }) => setCurrentIndex(index)}
+        onChangeIndex={handleSwipe}
         data={videoFeed}
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
           <View style={{ ...styles.videoContainer, height: videoHeight }}>
+            {/* Video Player */}
             <Video
               ref={videoRef}
               source={{ uri: item.videoUrl }}
-              shouldPlay={currentIndex === item.id && !isPaused}
+              shouldPlay={currentIndex === index}
               resizeMode="cover"
               style={styles.video}
-              isLooping={false}
-              onPlaybackStatusUpdate={(status) => {
-                if (status.didJustFinish) {
-                  handleVideoEnd();
-                }
-              }}
+              isLooping={true}
             />
-            {currentIndex === item.id && (
+
+            {/* Share Button */}
+            {currentIndex === index && (
               <TouchableOpacity
-                onPress={handleVideoPress}
-                style={styles.overlay}
+                style={styles.shareButton}
+                onPress={() => handleSharePress(item.videoUrl)}
               >
-                {isPaused && <Text style={styles.playButton}>Play</Text>}
+                <Text style={styles.shareButtonText}>Share</Text>
               </TouchableOpacity>
             )}
+
+            {/* Therapist Name */}
+            {currentIndex === index && (
+              <View style={styles.therapistNameContainer}>
+                <Text style={styles.therapistName}>{item.therapistName}</Text>
+                <Text style={styles.therapistName}>{item.title}</Text>
+              </View>
+            )}
+
+            {/* Play/Pause Overlay */}
+            {/* (Code for play/pause overlay here if needed) */}
           </View>
         )}
         keyExtractor={(item) => item.id.toString()}
@@ -110,15 +124,33 @@ const styles = StyleSheet.create({
     width,
     aspectRatio: width / (height - 79), // Adjusted this value to account for the height of the bottom tab bar
   },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  shareButton: {
+    position: "absolute",
+    bottom: 16,
+    right: 16,
+    backgroundColor: "#007AFF",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
   },
-  playButton: {
-    fontSize: 24,
+  shareButtonText: {
     color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  therapistNameContainer: {
+    position: "absolute",
+    bottom: 16,
+    left: 16,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+  },
+  therapistName: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
 
