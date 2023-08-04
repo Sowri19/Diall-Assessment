@@ -12,15 +12,16 @@ import axios from "axios";
 import { SwiperFlatList } from "react-native-swiper-flatlist";
 
 const { width, height } = Dimensions.get("window");
+const forwardScrollDuration = 500; // Set the duration in milliseconds
 
 const WatchPage = () => {
   const [videoFeed, setVideoFeed] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const bottomTabBarHeight = 79; // Replace this with the actual height of your custom bottom tab bar
-  const videoRef = useRef(null);
-  const lastLoggedIndexRef = useRef(currentIndex);
+  const currentIndex = useRef(0);
+  const swiperRef = useRef(null);
 
-  // This loads all the videos in the array when the component is rendered
+  const bottomTabBarHeight = 79;
+  const videoRef = useRef(null);
+
   useEffect(() => {
     const fetchVideoFeed = async () => {
       try {
@@ -33,76 +34,66 @@ const WatchPage = () => {
     fetchVideoFeed();
   }, []);
 
-  // Pause the video when the user swipes to a different video
   const handleSwipe = ({ index }) => {
-    setCurrentIndex(index); // SwiperFlatList automatically updates the currentIndex when the user swipes
-
-    // Log the current index when it changes
-    if (index !== lastLoggedIndexRef.current) {
-      console.log("Current Index:", index);
-      lastLoggedIndexRef.current = index;
-    }
+    currentIndex.current = index;
+    console.log("currentIndex", currentIndex.current);
   };
 
-  // Calculate the height of the video container
-  const videoHeight = height - bottomTabBarHeight;
-
-  // Function to handle the share button press
-  const handleSharePress = async (videoUrl) => {
-    try {
-      await Share.share({
-        message: videoUrl,
+  const endSwipe = ({ index }) => {
+    if (index === videoFeed.length - 1) {
+      currentIndex.current = 0;
+      console.log("EndIndex", currentIndex.current);
+      swiperRef.current.scrollToIndex({
+        index: 0,
+        animated: false,
+        viewPosition: 1,
       });
-    } catch (error) {
-      console.error("Error sharing video:", error);
     }
   };
+
+  const renderItem = ({ item, index }) => (
+    <View style={{ ...styles.videoContainer, height: videoHeight }}>
+      {/* Video Player */}
+      <Video
+        ref={videoRef}
+        source={{ uri: item.videoUrl }}
+        shouldPlay={currentIndex.current === index}
+        resizeMode="cover"
+        style={styles.video}
+        isLooping={true}
+      />
+
+      {/* Share Button */}
+      <TouchableOpacity
+        style={styles.shareButton}
+        onPress={() => handleSharePress(item.videoUrl)}
+      >
+        <Text style={styles.shareButtonText}>Share</Text>
+      </TouchableOpacity>
+
+      <View style={styles.therapistNameContainer}>
+        <Text style={styles.therapistName}>{item.therapistName}</Text>
+        <Text style={styles.therapistName}>{item.title}</Text>
+      </View>
+    </View>
+  );
+
+  const videoHeight = height - bottomTabBarHeight;
 
   return (
     <View style={styles.container}>
       <SwiperFlatList
-        index={currentIndex}
+        ref={swiperRef}
+        index={currentIndex.current}
         onChangeIndex={handleSwipe}
         data={videoFeed}
-        renderItem={({ item, index }) => (
-          <View style={{ ...styles.videoContainer, height: videoHeight }}>
-            {/* Video Player */}
-            <Video
-              ref={videoRef}
-              source={{ uri: item.videoUrl }}
-              shouldPlay={currentIndex === index}
-              resizeMode="cover"
-              style={styles.video}
-              isLooping={true}
-            />
-
-            {/* Share Button */}
-            {currentIndex === index && (
-              <TouchableOpacity
-                style={styles.shareButton}
-                onPress={() => handleSharePress(item.videoUrl)}
-              >
-                <Text style={styles.shareButtonText}>Share</Text>
-              </TouchableOpacity>
-            )}
-
-            {/* Therapist Name */}
-            {currentIndex === index && (
-              <View style={styles.therapistNameContainer}>
-                <Text style={styles.therapistName}>{item.therapistName}</Text>
-                <Text style={styles.therapistName}>{item.title}</Text>
-              </View>
-            )}
-
-            {/* Play/Pause Overlay */}
-            {/* (Code for play/pause overlay here if needed) */}
-          </View>
-        )}
+        renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
         style={styles.container}
         contentContainerStyle={styles.scrollContent}
         vertical={true}
         showPagination={false}
+        onMomentumScrollEnd={endSwipe}
       />
     </View>
   );
