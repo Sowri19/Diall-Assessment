@@ -61,56 +61,137 @@ const WatchPage = () => {
       console.error("Error sharing video:", error);
     }
   };
+  const VideoItem = ({ item, index, handleSharePress }) => {
+    const videoRef = useRef(null);
+    const [isPlaying, setIsPlaying] = useState(false); // <<<< Add this state
 
+    const handleVideoTap = async () => {
+      if (videoRef.current) {
+        try {
+          const videoStatus = await videoRef.current.getStatusAsync();
+          if (videoStatus.isPlaying) {
+            await videoRef.current.pauseAsync();
+            setIsPlaying(false); // <<<< Update state
+          } else {
+            await videoRef.current.playAsync();
+            setIsPlaying(true); // <<<< Update state
+          }
+        } catch (error) {
+          console.error("VideoTap error", error);
+        }
+      }
+    };
+
+    return (
+      <TouchableOpacity onPress={handleVideoTap}>
+        {/* Rest of your component */}
+        <Video
+          ref={videoRef}
+          source={{ uri: item.videoUrl }}
+          resizeMode="cover"
+          style={styles.video}
+          isLooping={true}
+        />
+        <Ionicons
+          name={isPlaying ? "pause" : "play"}
+          size={48}
+          color="white"
+          style={styles.videoIcon}
+        />
+        {/* Share Icon */}
+        <TouchableOpacity
+          style={{ ...styles.iconContainer, bottom: 16, right: 16 }}
+          onPress={() => handleSharePress(item.videoUrl)}
+        >
+          <Ionicons name="paper-plane-outline" size={35} color="#fff" />
+        </TouchableOpacity>
+
+        {/* Bookmark Icon */}
+        <TouchableOpacity
+          style={{ ...styles.iconContainer, bottom: 90, right: 16 }}
+          onPress={() => {}}
+        >
+          <Ionicons name="bookmark-outline" size={35} color="#fff" />
+        </TouchableOpacity>
+
+        {/* Comment Icon */}
+        <TouchableOpacity
+          style={{ ...styles.iconContainer, bottom: 164, right: 16 }}
+          onPress={() => {}}
+        >
+          <Ionicons name="chatbubble-outline" size={35} color="#fff" />
+        </TouchableOpacity>
+
+        {/* Heart Icon */}
+        <TouchableOpacity
+          style={{ ...styles.iconContainer, bottom: 230, right: 16 }}
+          onPress={() => {}}
+        >
+          <Ionicons name="heart-outline" size={35} color="#fff" />
+        </TouchableOpacity>
+
+        <View style={styles.therapistNameContainer}>
+          <Text style={styles.therapistName}>{item.therapistName}</Text>
+          <Text style={styles.therapistName}>{item.title}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  //   <TouchableOpacity onPress={() => handleVideoTap(index)}>
+  //     <View style={{ ...styles.videoContainer, height: videoHeight }}>
+  //       {/* Video Player */}
+  //       <Video
+  //         ref={videoRef}
+  //         source={{ uri: item.videoUrl }}
+  //         shouldPlay={currentIndex.current === index}
+  //         resizeMode="cover"
+  //         style={styles.video}
+  //         isLooping={true}
+  //         useNativeControls
+  //       />
+
+  // {/* Share Icon */}
+  // <TouchableOpacity
+  //   style={{ ...styles.iconContainer, bottom: 16, right: 16 }}
+  //   onPress={() => handleSharePress(item.videoUrl)}
+  // >
+  //   <Ionicons name="paper-plane-outline" size={35} color="#fff" />
+  // </TouchableOpacity>
+
+  // {/* Bookmark Icon */}
+  // <TouchableOpacity
+  //   style={{ ...styles.iconContainer, bottom: 90, right: 16 }}
+  //   onPress={() => {}}
+  // >
+  //   <Ionicons name="bookmark-outline" size={35} color="#fff" />
+  // </TouchableOpacity>
+
+  // {/* Comment Icon */}
+  // <TouchableOpacity
+  //   style={{ ...styles.iconContainer, bottom: 164, right: 16 }}
+  //   onPress={() => {}}
+  // >
+  //   <Ionicons name="chatbubble-outline" size={35} color="#fff" />
+  // </TouchableOpacity>
+
+  // {/* Heart Icon */}
+  // <TouchableOpacity
+  //   style={{ ...styles.iconContainer, bottom: 230, right: 16 }}
+  //   onPress={() => {}}
+  // >
+  //   <Ionicons name="heart-outline" size={35} color="#fff" />
+  // </TouchableOpacity>
+
+  // <View style={styles.therapistNameContainer}>
+  //   <Text style={styles.therapistName}>{item.therapistName}</Text>
+  //   <Text style={styles.therapistName}>{item.title}</Text>
+  // </View>
+  //     </View>
+  //   </TouchableOpacity>
+  // );
   const renderItem = ({ item, index }) => (
-    <View style={{ ...styles.videoContainer, height: videoHeight }}>
-      {/* Video Player */}
-      <Video
-        ref={videoRef}
-        source={{ uri: item.videoUrl }}
-        shouldPlay={currentIndex.current === index}
-        resizeMode="cover"
-        style={styles.video}
-        isLooping={true}
-      />
-
-      {/* Share Icon */}
-      <TouchableOpacity
-        style={{ ...styles.iconContainer, bottom: 16, right: 16 }}
-        onPress={() => handleSharePress(item.videoUrl)}
-      >
-        <Ionicons name="paper-plane-outline" size={35} color="#fff" />
-      </TouchableOpacity>
-
-      {/* Bookmark Icon */}
-      <TouchableOpacity
-        style={{ ...styles.iconContainer, bottom: 90, right: 16 }}
-        onPress={() => {}}
-      >
-        <Ionicons name="bookmark-outline" size={35} color="#fff" />
-      </TouchableOpacity>
-
-      {/* Comment Icon */}
-      <TouchableOpacity
-        style={{ ...styles.iconContainer, bottom: 164, right: 16 }}
-        onPress={() => {}}
-      >
-        <Ionicons name="chatbubble-outline" size={35} color="#fff" />
-      </TouchableOpacity>
-
-      {/* Heart Icon */}
-      <TouchableOpacity
-        style={{ ...styles.iconContainer, bottom: 230, right: 16 }}
-        onPress={() => {}}
-      >
-        <Ionicons name="heart-outline" size={35} color="#fff" />
-      </TouchableOpacity>
-
-      <View style={styles.therapistNameContainer}>
-        <Text style={styles.therapistName}>{item.therapistName}</Text>
-        <Text style={styles.therapistName}>{item.title}</Text>
-      </View>
-    </View>
+    <VideoItem item={item} index={index} handleSharePress={handleSharePress} />
   );
 
   const videoHeight = height - bottomTabBarHeight;
@@ -173,6 +254,15 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  videoOverlay: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  videoIcon: {
+    position: "absolute",
   },
 });
 
