@@ -10,6 +10,7 @@ import {
 import { Video } from "expo-av";
 import axios from "axios";
 import { SwiperFlatList } from "react-native-swiper-flatlist";
+import { Ionicons } from "@expo/vector-icons";
 
 const { width, height } = Dimensions.get("window");
 const forwardScrollDuration = 500; // Set the duration in milliseconds
@@ -51,6 +52,16 @@ const WatchPage = () => {
     }
   };
 
+  const handleSharePress = async (videoUrl) => {
+    try {
+      await Share.share({
+        message: videoUrl,
+      });
+    } catch (error) {
+      console.error("Error sharing video:", error);
+    }
+  };
+
   const renderItem = ({ item, index }) => (
     <View style={{ ...styles.videoContainer, height: videoHeight }}>
       {/* Video Player */}
@@ -63,12 +74,36 @@ const WatchPage = () => {
         isLooping={true}
       />
 
-      {/* Share Button */}
+      {/* Share Icon */}
       <TouchableOpacity
-        style={styles.shareButton}
+        style={{ ...styles.iconContainer, bottom: 16, right: 16 }}
         onPress={() => handleSharePress(item.videoUrl)}
       >
-        <Text style={styles.shareButtonText}>Share</Text>
+        <Ionicons name="paper-plane-outline" size={35} color="#fff" />
+      </TouchableOpacity>
+
+      {/* Bookmark Icon */}
+      <TouchableOpacity
+        style={{ ...styles.iconContainer, bottom: 90, right: 16 }}
+        onPress={() => {}}
+      >
+        <Ionicons name="bookmark-outline" size={35} color="#fff" />
+      </TouchableOpacity>
+
+      {/* Comment Icon */}
+      <TouchableOpacity
+        style={{ ...styles.iconContainer, bottom: 164, right: 16 }}
+        onPress={() => {}}
+      >
+        <Ionicons name="chatbubble-outline" size={35} color="#fff" />
+      </TouchableOpacity>
+
+      {/* Heart Icon */}
+      <TouchableOpacity
+        style={{ ...styles.iconContainer, bottom: 230, right: 16 }}
+        onPress={() => {}}
+      >
+        <Ionicons name="heart-outline" size={35} color="#fff" />
       </TouchableOpacity>
 
       <View style={styles.therapistNameContainer}>
@@ -115,19 +150,15 @@ const styles = StyleSheet.create({
     width,
     aspectRatio: width / (height - 79), // Adjusted this value to account for the height of the bottom tab bar
   },
-  shareButton: {
+  iconContainer: {
     position: "absolute",
     bottom: 16,
     right: 16,
-    backgroundColor: "#007AFF",
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-  },
-  shareButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
+    backgroundColor: "transparent",
+    padding: 8,
+    borderRadius: 50,
+    flexDirection: "row",
+    alignItems: "center",
   },
   therapistNameContainer: {
     position: "absolute",

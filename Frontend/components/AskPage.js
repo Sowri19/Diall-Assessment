@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { Camera } from "expo-camera";
 import { CameraType } from "expo-camera/build/Camera.types";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function App() {
   const [hasCameraPermission, setHasCameraPermission] = useState(null);
@@ -66,17 +67,17 @@ export default function App() {
 
       {/* Flip Camera Button */}
       <TouchableOpacity style={styles.flipCameraButton} onPress={flipCamera}>
-        <Text style={styles.buttonText}>Flip Camera</Text>
+        <Ionicons name="ios-camera-reverse" size={24} color="#fff" />
       </TouchableOpacity>
 
       {/* Record Video Button */}
       <TouchableOpacity style={styles.recordButton} onPress={recordVideo}>
-        <Text style={styles.buttonText}>Record Video</Text>
+        <Ionicons name="ios-videocam" size={24} color="#fff" />
       </TouchableOpacity>
 
       {/* Take Picture Button */}
       <TouchableOpacity style={styles.takePictureButton} onPress={takePicture}>
-        <Text style={styles.buttonText}>Take Picture</Text>
+        <Ionicons name="ios-camera" size={24} color="#fff" />
       </TouchableOpacity>
 
       {/* Display Captured Image */}
@@ -93,9 +94,8 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 16,
     left: 16,
-    backgroundColor: "#007AFF",
-    paddingVertical: 18,
-    paddingHorizontal: 10,
+    // backgroundColor: "#007AFF",
+    padding: 18,
     borderRadius: 50,
   },
   recordButton: {
@@ -103,23 +103,16 @@ const styles = StyleSheet.create({
     bottom: 16,
     right: 16,
     backgroundColor: "red",
-    paddingVertical: 18,
-    paddingHorizontal: 10,
+    padding: 18,
     borderRadius: 50,
   },
   takePictureButton: {
     position: "absolute",
     bottom: 16,
-    backgroundColor: "#007AFF",
-    paddingVertical: 18,
-    paddingHorizontal: 10,
+    // backgroundColor: "#007AFF",
+    padding: 18,
     borderRadius: 50,
     alignSelf: "center",
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
   },
   image: {
     flex: 1,
