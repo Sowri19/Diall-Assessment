@@ -21,7 +21,6 @@ const WatchPage = () => {
   const swiperRef = useRef(null);
 
   const bottomTabBarHeight = 79;
-  const videoRef = useRef(null);
 
   useEffect(() => {
     const fetchVideoFeed = async () => {
@@ -61,9 +60,20 @@ const WatchPage = () => {
       console.error("Error sharing video:", error);
     }
   };
+
   const VideoItem = ({ item, index, handleSharePress }) => {
     const videoRef = useRef(null);
-    const [isPlaying, setIsPlaying] = useState(false); // <<<< Add this state
+    const [isPlaying, setIsPlaying] = useState(true);
+
+    useEffect(() => {
+      (async () => {
+        try {
+          await videoRef.current.playAsync();
+        } catch (error) {
+          console.error("Error playing video:", error);
+        }
+      })();
+    }, []);
 
     const handleVideoTap = async () => {
       if (videoRef.current) {
@@ -71,10 +81,10 @@ const WatchPage = () => {
           const videoStatus = await videoRef.current.getStatusAsync();
           if (videoStatus.isPlaying) {
             await videoRef.current.pauseAsync();
-            setIsPlaying(false); // <<<< Update state
+            setIsPlaying(false);
           } else {
             await videoRef.current.playAsync();
-            setIsPlaying(true); // <<<< Update state
+            setIsPlaying(true);
           }
         } catch (error) {
           console.error("VideoTap error", error);
@@ -84,7 +94,7 @@ const WatchPage = () => {
 
     return (
       <TouchableOpacity onPress={handleVideoTap}>
-        {/* Rest of your component */}
+        {/* Video Player */}
         <Video
           ref={videoRef}
           source={{ uri: item.videoUrl }}
@@ -92,44 +102,37 @@ const WatchPage = () => {
           style={styles.video}
           isLooping={true}
         />
-        <Ionicons
-          name={isPlaying ? "pause" : "play"}
-          size={48}
-          color="white"
-          style={styles.videoIcon}
-        />
-        {/* Share Icon */}
+        {/* Play Icon */}
+        {!isPlaying && (
+          <View style={styles.videoOverlay}>
+            <Ionicons name="play" size={90} color="white" />
+          </View>
+        )}
+        {/* Rest of your component */}
         <TouchableOpacity
           style={{ ...styles.iconContainer, bottom: 16, right: 16 }}
           onPress={() => handleSharePress(item.videoUrl)}
         >
           <Ionicons name="paper-plane-outline" size={35} color="#fff" />
         </TouchableOpacity>
-
-        {/* Bookmark Icon */}
         <TouchableOpacity
           style={{ ...styles.iconContainer, bottom: 90, right: 16 }}
           onPress={() => {}}
         >
           <Ionicons name="bookmark-outline" size={35} color="#fff" />
         </TouchableOpacity>
-
-        {/* Comment Icon */}
         <TouchableOpacity
           style={{ ...styles.iconContainer, bottom: 164, right: 16 }}
           onPress={() => {}}
         >
           <Ionicons name="chatbubble-outline" size={35} color="#fff" />
         </TouchableOpacity>
-
-        {/* Heart Icon */}
         <TouchableOpacity
           style={{ ...styles.iconContainer, bottom: 230, right: 16 }}
           onPress={() => {}}
         >
           <Ionicons name="heart-outline" size={35} color="#fff" />
         </TouchableOpacity>
-
         <View style={styles.therapistNameContainer}>
           <Text style={styles.therapistName}>{item.therapistName}</Text>
           <Text style={styles.therapistName}>{item.title}</Text>
@@ -138,58 +141,6 @@ const WatchPage = () => {
     );
   };
 
-  //   <TouchableOpacity onPress={() => handleVideoTap(index)}>
-  //     <View style={{ ...styles.videoContainer, height: videoHeight }}>
-  //       {/* Video Player */}
-  //       <Video
-  //         ref={videoRef}
-  //         source={{ uri: item.videoUrl }}
-  //         shouldPlay={currentIndex.current === index}
-  //         resizeMode="cover"
-  //         style={styles.video}
-  //         isLooping={true}
-  //         useNativeControls
-  //       />
-
-  // {/* Share Icon */}
-  // <TouchableOpacity
-  //   style={{ ...styles.iconContainer, bottom: 16, right: 16 }}
-  //   onPress={() => handleSharePress(item.videoUrl)}
-  // >
-  //   <Ionicons name="paper-plane-outline" size={35} color="#fff" />
-  // </TouchableOpacity>
-
-  // {/* Bookmark Icon */}
-  // <TouchableOpacity
-  //   style={{ ...styles.iconContainer, bottom: 90, right: 16 }}
-  //   onPress={() => {}}
-  // >
-  //   <Ionicons name="bookmark-outline" size={35} color="#fff" />
-  // </TouchableOpacity>
-
-  // {/* Comment Icon */}
-  // <TouchableOpacity
-  //   style={{ ...styles.iconContainer, bottom: 164, right: 16 }}
-  //   onPress={() => {}}
-  // >
-  //   <Ionicons name="chatbubble-outline" size={35} color="#fff" />
-  // </TouchableOpacity>
-
-  // {/* Heart Icon */}
-  // <TouchableOpacity
-  //   style={{ ...styles.iconContainer, bottom: 230, right: 16 }}
-  //   onPress={() => {}}
-  // >
-  //   <Ionicons name="heart-outline" size={35} color="#fff" />
-  // </TouchableOpacity>
-
-  // <View style={styles.therapistNameContainer}>
-  //   <Text style={styles.therapistName}>{item.therapistName}</Text>
-  //   <Text style={styles.therapistName}>{item.title}</Text>
-  // </View>
-  //     </View>
-  //   </TouchableOpacity>
-  // );
   const renderItem = ({ item, index }) => (
     <VideoItem item={item} index={index} handleSharePress={handleSharePress} />
   );
@@ -229,7 +180,7 @@ const styles = StyleSheet.create({
   },
   video: {
     width,
-    aspectRatio: width / (height - 79), // Adjusted this value to account for the height of the bottom tab bar
+    aspectRatio: width / (height - 79),
   },
   iconContainer: {
     position: "absolute",
@@ -256,13 +207,14 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   videoOverlay: {
-    width: "100%",
-    height: "100%",
+    ...StyleSheet.absoluteFillObject,
     justifyContent: "center",
     alignItems: "center",
   },
   videoIcon: {
     position: "absolute",
+    top: 16,
+    right: 16,
   },
 });
 
