@@ -77,6 +77,27 @@ export default function App() {
     setRecord(null);
   };
 
+  const handleVideoUpload = async () => {
+    // Implement video upload here using fetch or any other library (e.g., Axios)
+    // Replace 'YOUR_BACKEND_URL' with the actual backend endpoint to upload the video
+    try {
+      const response = await fetch("YOUR_BACKEND_URL", {
+        method: "POST",
+        body: {
+          uri: record,
+          type: "video/mp4",
+          name: "video-file.mp4",
+        },
+      });
+
+      // Handle the response from the backend if needed
+      const data = await response.json();
+      console.log("Upload response:", data);
+    } catch (error) {
+      console.error("Error uploading video:", error);
+    }
+  };
+
   if (hasCameraPermission === null || hasAudioPermission === null) {
     return <View />;
   }
@@ -101,7 +122,7 @@ export default function App() {
             ref={video}
             style={styles.video}
             source={{ uri: record }}
-            resizeMode="contain"
+            resizeMode="cover" // Set resizeMode to cover to make the video take full screen
             isLooping
             onPlaybackStatusUpdate={(status) => setStatus(() => status)}
           />
@@ -110,18 +131,24 @@ export default function App() {
               style={styles.pauseButton}
               onPress={pauseRecordedVideo}
             >
-              <Ionicons name="pause" size={24} color="#fff" />
+              <Ionicons name="pause" size={54} color="#fff" />
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
               style={styles.playButton}
               onPress={playRecordedVideo}
             >
-              <Ionicons name="play" size={24} color="#fff" />
+              <Ionicons name="play" size={54} color="#fff" />
             </TouchableOpacity>
           )}
+          <TouchableOpacity
+            style={styles.sendButton}
+            onPress={handleVideoUpload}
+          >
+            <Text style={styles.sendButtonText}>Send</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.backButton} onPress={goBackToPreview}>
-            <Ionicons name="arrow-back" size={24} color="#fff" />
+            <Ionicons name="close-outline" size={54} color="#fff" />
           </TouchableOpacity>
         </View>
       ) : (
@@ -132,23 +159,31 @@ export default function App() {
             type={type}
             ratio="4:3"
           />
-          <View style={styles.buttons}>
-            {!isRecording ? (
-              <>
-                <TouchableOpacity style={styles.button} onPress={flipCamera}>
-                  <Ionicons name="camera-reverse" size={24} color="#fff" />
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.button} onPress={takeVideo}>
-                  <Ionicons name="videocam" size={24} color="#fff" />
-                </TouchableOpacity>
-              </>
-            ) : (
-              <TouchableOpacity style={styles.button} onPress={stopVideo}>
-                <Ionicons name="stop" size={24} color="#fff" />
+          {!isRecording ? (
+            <>
+              <TouchableOpacity style={styles.flipButton} onPress={flipCamera}>
+                <Ionicons name="camera-reverse" size={34} color="#fff" />
               </TouchableOpacity>
-            )}
-          </View>
+
+              <TouchableOpacity
+                style={styles.takeStopVideoButton}
+                onPress={takeVideo}
+              >
+                <Ionicons
+                  name="radio-button-off-outline"
+                  size={64}
+                  color="#fff"
+                />
+              </TouchableOpacity>
+            </>
+          ) : (
+            <TouchableOpacity
+              style={styles.takeStopVideoButton}
+              onPress={stopVideo}
+            >
+              <Ionicons name="stop" size={64} color="#fff" />
+            </TouchableOpacity>
+          )}
           {isRecording && (
             <View style={styles.recordingIndicator}>
               <Text style={styles.recordingTimeText}>
@@ -168,6 +203,8 @@ const styles = StyleSheet.create({
   },
   cameraContainer: {
     flex: 1,
+    position: "relative",
+    backgroundColor: "#000", // Set a background color for the camera container
   },
   camera: {
     flex: 1,
@@ -175,12 +212,11 @@ const styles = StyleSheet.create({
   videoContainer: {
     flex: 1,
     position: "relative",
+    backgroundColor: "#000", // Set a background color for the video container
   },
   video: {
     flex: 1,
-    alignSelf: "center",
-    width: 350,
-    height: 220,
+    alignSelf: "stretch", // Stretch the video to take full screen
   },
   buttons: {
     flexDirection: "row",
@@ -188,19 +224,33 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "transparent",
     padding: 10,
+    position: "absolute",
+    bottom: 16,
+    left: 0,
+    right: 0,
   },
-  button: {
+  flipButton: {
+    position: "absolute",
+    top: 16,
+    right: 16,
+    padding: 12,
+    borderRadius: 50,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  takeStopVideoButton: {
+    position: "absolute",
+    bottom: 80,
+    alignSelf: "center",
     padding: 12,
     borderRadius: 50,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   backButton: {
     position: "absolute",
-    top: 16,
+    top: 36,
     left: 16,
     padding: 12,
     borderRadius: 50,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   pauseButton: {
     position: "absolute",
@@ -208,7 +258,6 @@ const styles = StyleSheet.create({
     left: 16,
     padding: 12,
     borderRadius: 50,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   playButton: {
     position: "absolute",
@@ -216,7 +265,19 @@ const styles = StyleSheet.create({
     left: 16,
     padding: 12,
     borderRadius: 50,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  sendButton: {
+    position: "absolute",
+    bottom: 26,
+    right: 26,
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    borderRadius: 50,
+    backgroundColor: "#4CAF50",
+  },
+  sendButtonText: {
+    color: "#fff",
+    fontSize: 34,
   },
   recordingIndicator: {
     position: "absolute",
