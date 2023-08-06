@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  TextInput,
+} from "react-native";
 import { Camera } from "expo-camera";
 import { Video, Audio } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,6 +21,7 @@ export default function App() {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingProgress, setRecordingProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [videoTitle, setVideoTitle] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -78,16 +85,25 @@ export default function App() {
   };
 
   const handleVideoUpload = async () => {
-    // Implement video upload here using fetch or any other library (e.g., Axios)
-    // Replace 'YOUR_BACKEND_URL' with the actual backend endpoint to upload the video
+    if (videoTitle.trim() === "") {
+      alert("Title is mandatory. Please enter a title for the video.");
+      return;
+    }
+
     try {
-      const response = await fetch("YOUR_BACKEND_URL", {
+      const formData = new FormData();
+      formData.append("video", {
+        uri: record,
+        type: "video/mp4",
+        name: "video-file.mp4",
+      });
+      formData.append("title", videoTitle);
+      formData.append("therapistName", "Your therapist name"); // Replace with the actual therapist name
+      formData.append("createdBy", "Your username or user ID"); // Replace with the actual creator's username or ID
+
+      const response = await fetch("http://192.168.5.48:3000/api/videos/", {
         method: "POST",
-        body: {
-          uri: record,
-          type: "video/mp4",
-          name: "video-file.mp4",
-        },
+        body: formData,
       });
 
       // Handle the response from the backend if needed
@@ -150,6 +166,20 @@ export default function App() {
           <TouchableOpacity style={styles.backButton} onPress={goBackToPreview}>
             <Ionicons name="close-outline" size={54} color="#fff" />
           </TouchableOpacity>
+
+          {/* Title Input Overlay */}
+          <View style={styles.titleOverlay}>
+            <TextInput
+              style={[styles.titleInput, { color: "#fff" }]}
+              placeholder="Enter Video Title (Max 40 characters)"
+              placeholderTextColor="#fff"
+              textAlignVertical="top"
+              value={videoTitle}
+              onChangeText={setVideoTitle}
+              maxLength={40}
+              autoFocus
+            />
+          </View>
         </View>
       ) : (
         <View style={styles.cameraContainer}>
@@ -204,7 +234,7 @@ const styles = StyleSheet.create({
   cameraContainer: {
     flex: 1,
     position: "relative",
-    backgroundColor: "#000", // Set a background color for the camera container
+    backgroundColor: "#000",
   },
   camera: {
     flex: 1,
@@ -212,11 +242,11 @@ const styles = StyleSheet.create({
   videoContainer: {
     flex: 1,
     position: "relative",
-    backgroundColor: "#000", // Set a background color for the video container
+    backgroundColor: "#000",
   },
   video: {
     flex: 1,
-    alignSelf: "stretch", // Stretch the video to take full screen
+    alignSelf: "stretch",
   },
   buttons: {
     flexDirection: "row",
@@ -291,5 +321,23 @@ const styles = StyleSheet.create({
   recordingTimeText: {
     color: "#fff",
     fontSize: 16,
+  },
+  titleOverlay: {
+    position: "absolute",
+    top: 150,
+    left: 60,
+    right: 60,
+    padding: 10,
+    borderRadius: 50,
+    color: "#fff",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  titleInput: {
+    height: 40,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    marginBottom: 10,
   },
 });

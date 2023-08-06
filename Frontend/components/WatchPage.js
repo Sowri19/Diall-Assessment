@@ -25,7 +25,9 @@ const WatchPage = () => {
   useEffect(() => {
     const fetchVideoFeed = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/videos");
+        const response = await axios.get(
+          "http://192.168.5.48:3000/api/videos/"
+        );
         setVideoFeed(response.data);
       } catch (error) {
         console.error("Error fetching video feed:", error);
