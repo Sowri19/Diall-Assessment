@@ -1,10 +1,9 @@
 const admin = require("firebase-admin");
 const db = admin.firestore();
-const { v4: uuidv4 } = require("uuid");
 
 class Video {
-  constructor(title, therapistId, userId, userVideo, therapistVideo) {
-    this.id = uuidv4(); // Auto-generate UUID for video ID
+  constructor(id, title, therapistId, userId, userVideo, therapistVideo) {
+    this.id = id; // Use the provided ID
     this.title = title;
     this.therapistId = therapistId;
     this.userId = userId;
@@ -15,10 +14,17 @@ class Video {
 
   // Add a new video to the Firestore collection
   async save() {
+    // Check if videoKey is a non-empty integer
+    if (!Number.isInteger(this.id) || this.id <= 0) {
+      throw new Error(
+        "Invalid video key. Video key must be a positive integer."
+      );
+    }
+
     try {
-      const videoRef = await db.collection("videos").doc(this.id);
+      const videoRef = await db.collection("videos").doc(this.id.toString());
       await videoRef.set({
-        id: this.id,
+        id: this.id, // Save the ID in the document
         title: this.title,
         therapistId: this.therapistId,
         userId: this.userId,
@@ -30,7 +36,6 @@ class Video {
       throw new Error("Error saving video document: " + error.message);
     }
   }
-
   // Fetch a video by its ID from the Firestore collection
   static async getVideoByID(videoID) {
     try {
@@ -51,6 +56,33 @@ class Video {
       }
     } catch (error) {
       throw new Error("Error fetching video document: " + error.message);
+    }
+  }
+
+  // Fetch all videos from the Firestore collection
+  static async getAllVideos() {
+    try {
+      const videosRef = await db.collection("videos").get();
+      const allVideos = [];
+
+      videosRef.forEach((videoSnapshot) => {
+        const videoData = videoSnapshot.data();
+
+        const video = new Video(
+          videoData.id,
+          videoData.title,
+          videoData.therapistId,
+          videoData.userId,
+          videoData.userVideo,
+          videoData.therapistVideo
+        );
+        video.createdAt = videoData.createdAt.toDate(); // Convert Firestore Timestamp to Date
+        allVideos.push(video);
+      });
+
+      return allVideos;
+    } catch (error) {
+      throw new Error("Error fetching all videos: " + error.message);
     }
   }
 }

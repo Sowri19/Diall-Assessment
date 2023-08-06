@@ -14,7 +14,8 @@ export default function App() {
   const [hasAudioPermission, setHasAudioPermission] = useState(null);
   const [hasCameraPermission, setHasCameraPermission] = useState(null);
   const [camera, setCamera] = useState(null);
-  const [record, setRecord] = useState(null);
+  const [userRecord, setRecord] = useState(null);
+  const [therapistRecord, setTherapistRecord] = useState(null);
   const [type, setType] = useState(Camera.Constants.Type.back);
   const video = React.useRef(null);
   const [status, setStatus] = React.useState({});
@@ -67,14 +68,14 @@ export default function App() {
   };
 
   const playRecordedVideo = async () => {
-    if (video.current && record) {
+    if (video.current && userRecord) {
       setIsPlaying(true);
       await video.current.playAsync();
     }
   };
 
   const pauseRecordedVideo = async () => {
-    if (video.current && record) {
+    if (video.current && userRecord) {
       setIsPlaying(false);
       await video.current.pauseAsync();
     }
@@ -84,6 +85,36 @@ export default function App() {
     setRecord(null);
   };
 
+  // const handleVideoUpload = async () => {
+  //   if (videoTitle.trim() === "") {
+  //     alert("Title is mandatory. Please enter a title for the video.");
+  //     return;
+  //   }
+
+  //   try {
+  //     const formData = new FormData();
+  //     formData.append("video", {
+  //       uri: userRecord,
+  //       type: "video/mp4",
+  //       name: "video-file.mp4",
+  //     });
+  //     formData.append("title", videoTitle);
+  //     formData.append("therapistName", "Your therapist name"); // Replace with the actual therapist name
+  //     formData.append("createdBy", "Your username or user ID"); // Replace with the actual creator's username or ID
+
+  //     const response = await fetch("http://192.168.5.48:3000/api/videos/", {
+  //       method: "POST",
+  //       body: formData,
+  //     });
+
+  //     // Handle the response from the backend if needed
+  //     const data = await response.json();
+  //     console.log("Upload response:", data);
+  //   } catch (error) {
+  //     console.error("Error uploading video:", error);
+  //   }
+  // };
+
   const handleVideoUpload = async () => {
     if (videoTitle.trim() === "") {
       alert("Title is mandatory. Please enter a title for the video.");
@@ -92,23 +123,51 @@ export default function App() {
 
     try {
       const formData = new FormData();
-      formData.append("video", {
-        uri: record,
-        type: "video/mp4",
-        name: "video-file.mp4",
-      });
       formData.append("title", videoTitle);
-      formData.append("therapistName", "Your therapist name"); // Replace with the actual therapist name
-      formData.append("createdBy", "Your username or user ID"); // Replace with the actual creator's username or ID
 
+      // Optional fields
+      const therapistId = null; // Initialize to null or the actual therapistId value
+      const userId = null; // Initialize to null or the actual userId value
+
+      // Optional fields
+      if (therapistId) {
+        formData.append("therapistId", therapistId);
+      }
+      if (userId) {
+        formData.append("userId", userId);
+      }
+
+      // Upload user video if available
+      if (userRecord) {
+        formData.append("userVideo", {
+          uri: userRecord,
+          type: "video/mp4",
+          name: "user-video-file.mp4",
+        });
+      }
+
+      // Upload therapist video if available
+      if (therapistRecord) {
+        formData.append("therapistRecord", {
+          uri: therapistRecord.uri,
+          type: "video/mp4",
+          name: "therapist-video-file.mp4",
+        });
+      }
+
+      // Make a POST request to your Node.js server endpoint to create the video
       const response = await fetch("http://192.168.5.48:3000/api/videos/", {
         method: "POST",
         body: formData,
       });
 
-      // Handle the response from the backend if needed
-      const data = await response.json();
-      console.log("Upload response:", data);
+      // Check if the response was successful (status code 2xx)
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Upload response:", data);
+      } else {
+        console.error("Error uploading video:", response.statusText);
+      }
     } catch (error) {
       console.error("Error uploading video:", error);
     }
@@ -132,12 +191,12 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      {record ? (
+      {userRecord ? (
         <View style={styles.videoContainer}>
           <Video
             ref={video}
             style={styles.video}
-            source={{ uri: record }}
+            source={{ uri: userRecord }}
             resizeMode="cover" // Set resizeMode to cover to make the video take full screen
             isLooping
             onPlaybackStatusUpdate={(status) => setStatus(() => status)}

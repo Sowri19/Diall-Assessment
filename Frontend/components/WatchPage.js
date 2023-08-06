@@ -13,7 +13,6 @@ import { SwiperFlatList } from "react-native-swiper-flatlist";
 import { Ionicons } from "@expo/vector-icons";
 
 const { width, height } = Dimensions.get("window");
-const forwardScrollDuration = 500; // Set the duration in milliseconds
 
 const WatchPage = () => {
   const [videoFeed, setVideoFeed] = useState([]);
@@ -28,7 +27,7 @@ const WatchPage = () => {
         const response = await axios.get(
           "http://192.168.5.48:3000/api/videos/"
         );
-        setVideoFeed(response.data);
+        setVideoFeed(response.data.videos);
       } catch (error) {
         console.error("Error fetching video feed:", error);
       }
@@ -53,10 +52,10 @@ const WatchPage = () => {
     }
   };
 
-  const handleSharePress = async (videoUrl) => {
+  const handleSharePress = async (userVideo) => {
     try {
       await Share.share({
-        message: videoUrl,
+        message: userVideo,
       });
     } catch (error) {
       console.error("Error sharing video:", error);
@@ -66,7 +65,6 @@ const WatchPage = () => {
   const VideoItem = ({ item, index, handleSharePress }) => {
     const videoRef = useRef(null);
     const [isPlaying, setIsPlaying] = useState(true);
-
     useEffect(() => {
       (async () => {
         try {
@@ -99,7 +97,7 @@ const WatchPage = () => {
         {/* Video Player */}
         <Video
           ref={videoRef}
-          source={{ uri: item.videoUrl }}
+          source={{ uri: item.userVideo }}
           resizeMode="cover"
           style={styles.video}
           isLooping={true}
@@ -113,7 +111,7 @@ const WatchPage = () => {
         {/* Rest of your component */}
         <TouchableOpacity
           style={{ ...styles.iconContainer, bottom: 16, right: 16 }}
-          onPress={() => handleSharePress(item.videoUrl)}
+          onPress={() => handleSharePress(item.userVideo)}
         >
           <Ionicons name="paper-plane-outline" size={35} color="#fff" />
         </TouchableOpacity>

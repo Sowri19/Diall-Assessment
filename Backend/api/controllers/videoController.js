@@ -1,13 +1,14 @@
 const admin = require("firebase-admin");
 const Video = require("../models/videoModel");
+const db = admin.firestore();
 
 // Function to upload video to Firebase Storage and get the download URL
 async function uploadVideo(videoBuffer) {
   try {
     const storageBucket = admin.storage().bucket();
-    const { v4: uuidv4 } = require("uuid");
 
-    const videoFilename = uuidv4(); // Generate a unique filename for the video
+    // Generate a unique filename using the current timestamp
+    const videoFilename = Date.now().toString();
     const videoFileRef = storageBucket.file(videoFilename);
 
     // Upload the video file to the storage bucket
@@ -34,6 +35,24 @@ const createVideo = async (req, res, next) => {
   try {
     const { title, therapistId, userId } = req.body;
 
+    // Function to get the next available video key and update the counter
+    async function getNextVideoKey() {
+      const lastUsedKeyRef = db.collection("lastUsedKeys").doc("videoKey");
+      const lastUsedKeySnapshot = await lastUsedKeyRef.get();
+      let lastUsedKey = lastUsedKeySnapshot.exists
+        ? lastUsedKeySnapshot.data().videoKey
+        : 0;
+
+      // Increment the last used video key for the next video
+      const nextVideoKey = lastUsedKey + 1;
+
+      // Update the last used video key in the database
+      await lastUsedKeyRef.set({ videoKey: nextVideoKey });
+
+      // Return the next available video key as an integer
+      return nextVideoKey;
+    }
+
     // Check if video uploads are provided
     const userVideoFile = req.files["userVideo"];
     const therapistVideoFile = req.files["therapistVideo"];
@@ -51,33 +70,32 @@ const createVideo = async (req, res, next) => {
       therapistVideo = await uploadVideo(therapistVideoFile[0].buffer); // Access the first file in the array
     }
 
-    // Check if any of the optional fields are missing and set them to null
-    const video = new Video(
-      title,
-      therapistId || null,
-      userId || null,
-      userVideo || null,
-      therapistVideo || null
-    );
-    await video.save();
+    // Get the next available video ID from Firestore
+    const nextVideoKey = await getNextVideoKey();
 
-    res.status(201).json({
-      message: "Video created successfully.",
-      video: {
-        id: video.id,
-        title: video.title,
-        therapistId: video.therapistId,
-        userId: video.userId,
-        userVideo: video.userVideo,
-        therapistVideo: video.therapistVideo,
-        createdAt: video.createdAt,
-      },
-    });
+    // Save the video data in Firestore database with the custom key named "id"
+    const videoData = {
+      id: nextVideoKey,
+      title,
+      therapistId: therapistId || null,
+      userId: userId || null,
+      userVideo: userVideo || null,
+      therapistVideo: therapistVideo || null,
+      createdAt: admin.firestore.Timestamp.now(),
+    };
+
+    // Create a new video document in Firestore
+    const videoRef = await db.collection("videos").add(videoData);
+
+    // Include the custom video key in the response
+    const videoWithKey = { id: videoRef.id, ...videoData };
+    res
+      .status(201)
+      .json({ message: "Video created successfully.", video: videoWithKey });
   } catch (error) {
     next(error);
   }
 };
-
 // Controller to fetch a video by its ID
 const getVideoByID = async (req, res, next) => {
   try {
@@ -106,8 +124,18 @@ const getVideoByID = async (req, res, next) => {
     next(error);
   }
 };
+// Inside your API controller or route
+const getAllVideos = async (req, res, next) => {
+  try {
+    const allVideos = await Video.getAllVideos();
+    res.status(200).json({ videos: allVideos });
+  } catch (error) {
+    next(error);
+  }
+};
 
 module.exports = {
   createVideo,
   getVideoByID,
+  getAllVideos,
 };
