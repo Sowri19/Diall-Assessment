@@ -9,6 +9,7 @@ import {
 import { Camera } from "expo-camera";
 import { Video, Audio } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native"; // Import useNavigation
 
 export default function App() {
   const [hasAudioPermission, setHasAudioPermission] = useState(null);
@@ -23,7 +24,7 @@ export default function App() {
   const [recordingProgress, setRecordingProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [videoTitle, setVideoTitle] = useState("");
-
+  const navigation = useNavigation();
   useEffect(() => {
     (async () => {
       const cameraStatus = await Camera.requestCameraPermissionsAsync();
@@ -165,6 +166,9 @@ export default function App() {
       if (response.ok) {
         const data = await response.json();
         console.log("Upload response:", data);
+        // Navigate to the Watch page after successful upload
+
+        navigation.navigate("Watch");
       } else {
         console.error("Error uploading video:", response.statusText);
       }

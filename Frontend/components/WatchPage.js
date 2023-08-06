@@ -11,6 +11,7 @@ import { Video } from "expo-av";
 import axios from "axios";
 import { SwiperFlatList } from "react-native-swiper-flatlist";
 import { Ionicons } from "@expo/vector-icons";
+import { useIsFocused } from "@react-navigation/native";
 
 const { width, height } = Dimensions.get("window");
 
@@ -21,20 +22,23 @@ const WatchPage = () => {
 
   const bottomTabBarHeight = 79;
 
+  const fetchVideoFeed = async () => {
+    try {
+      const response = await axios.get("http://192.168.5.48:3000/api/videos/");
+      setVideoFeed(response.data.videos);
+    } catch (error) {
+      console.error("Error fetching video feed:", error);
+    }
+  };
   useEffect(() => {
-    const fetchVideoFeed = async () => {
-      try {
-        const response = await axios.get(
-          "http://192.168.5.48:3000/api/videos/"
-        );
-        setVideoFeed(response.data.videos);
-      } catch (error) {
-        console.error("Error fetching video feed:", error);
-      }
-    };
     fetchVideoFeed();
   }, []);
-
+  const isFocused = useIsFocused();
+  useEffect(() => {
+    if (isFocused) {
+      fetchVideoFeed();
+    }
+  }, [isFocused]);
   const handleSwipe = ({ index }) => {
     currentIndex.current = index;
     console.log("currentIndex", currentIndex.current);
