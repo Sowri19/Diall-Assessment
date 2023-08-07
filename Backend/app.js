@@ -3,8 +3,6 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const admin = require("firebase-admin");
 const serviceAccount = require("./serviceAccountKey.json");
-const multer = require("multer");
-const upload = multer();
 
 // Initialize Firebase Admin SDK
 admin.initializeApp({
@@ -19,10 +17,12 @@ app.use(cors());
 // Importing the routes
 const userRoutes = require("./api/routes/userRoutes");
 const videoRoutes = require("./api/routes/videoRoutes");
+const therapistRoutes = require("./api/routes/therapistRoutes"); // Add this line to import the therapist routes
 
 // Use the userRoutes for user-related endpoints
 app.use("/api/users", userRoutes);
 app.use("/api/videos", videoRoutes);
+app.use("/api/therapists", therapistRoutes); // Add this line to use the therapist routes
 
 // Error handling middleware
 app.use((error, req, res, next) => {
