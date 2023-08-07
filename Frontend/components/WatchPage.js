@@ -147,8 +147,8 @@ const WatchPage = () => {
           <Ionicons name="heart-outline" size={35} color="#fff" />
         </TouchableOpacity>
         <View style={styles.therapistNameContainer}>
-          <Text style={styles.therapistName}>{item.therapistName}</Text>
           <Text style={styles.therapistName}>{item.title}</Text>
+          <Text style={styles.therapistName}>{item.userId}</Text>
         </View>
       </TouchableOpacity>
     );

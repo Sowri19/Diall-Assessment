@@ -5,6 +5,7 @@ import {
   View,
   TouchableOpacity,
   TextInput,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { Camera } from "expo-camera";
 import { Video, Audio } from "expo-av";
@@ -25,6 +26,18 @@ export default function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [videoTitle, setVideoTitle] = useState("");
   const navigation = useNavigation();
+  const [isPopupVisible, setPopupVisible] = useState(false);
+
+  const randomMessages = [
+    "I code with passion",
+    "I want to work with diall app",
+    "coidng is fun",
+  ];
+  const getRandomMessage = () => {
+    const randomIndex = Math.floor(Math.random() * randomMessages.length);
+    return randomMessages[randomIndex];
+  };
+
   useEffect(() => {
     (async () => {
       const cameraStatus = await Camera.requestCameraPermissionsAsync();
@@ -192,7 +205,15 @@ export default function App() {
         : Camera.Constants.Type.back
     );
   };
+  const handleTap = () => {
+    if (isPopupVisible) {
+      setPopupVisible(false);
+    }
+  };
 
+  const showPopup = () => {
+    setPopupVisible(true);
+  };
   return (
     <View style={styles.container}>
       {userRecord ? (
@@ -246,45 +267,79 @@ export default function App() {
         </View>
       ) : (
         <View style={styles.cameraContainer}>
-          <Camera
-            ref={(ref) => setCamera(ref)}
-            style={styles.camera}
-            type={type}
-            ratio="4:3"
-          />
-          {!isRecording ? (
-            <>
-              <TouchableOpacity style={styles.flipButton} onPress={flipCamera}>
-                <Ionicons name="camera-reverse" size={34} color="#fff" />
-              </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={1}
+            style={styles.cameraContainer}
+            onPress={handleTap}
+          >
+            <Camera
+              ref={(ref) => setCamera(ref)}
+              style={styles.camera}
+              type={type}
+              ratio="4:3"
+            />
+            <TouchableOpacity
+              style={styles.popupButton}
+              onPress={showPopup}
+              activeOpacity={0.8}
+            >
+              <Ionicons
+                name="information-circle-outline"
+                size={44}
+                color="#fff"
+              />
+            </TouchableOpacity>
+            {!isRecording ? (
+              <>
+                <TouchableOpacity
+                  style={styles.flipButton}
+                  onPress={flipCamera}
+                >
+                  <Ionicons name="camera-reverse" size={34} color="#fff" />
+                </TouchableOpacity>
 
+                <TouchableOpacity
+                  style={styles.takeStopVideoButton}
+                  onPress={takeVideo}
+                >
+                  <Ionicons
+                    name="radio-button-off-outline"
+                    size={124}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+              </>
+            ) : (
               <TouchableOpacity
                 style={styles.takeStopVideoButton}
-                onPress={takeVideo}
+                onPress={stopVideo}
               >
-                <Ionicons
-                  name="radio-button-off-outline"
-                  size={64}
-                  color="#fff"
-                />
+                <Ionicons name="stop" size={124} color="#fff" />
               </TouchableOpacity>
-            </>
-          ) : (
-            <TouchableOpacity
-              style={styles.takeStopVideoButton}
-              onPress={stopVideo}
-            >
-              <Ionicons name="stop" size={64} color="#fff" />
-            </TouchableOpacity>
-          )}
-          {isRecording && (
-            <View style={styles.recordingIndicator}>
-              <Text style={styles.recordingTimeText}>
-                Recording: {15 - recordingProgress} seconds left
-              </Text>
-            </View>
-          )}
+            )}
+            {isRecording && (
+              <View style={styles.recordingIndicator}>
+                <Text style={styles.recordingTimeText}>
+                  Recording: {15 - recordingProgress} seconds left
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
         </View>
+      )}
+      {isPopupVisible && (
+        <TouchableWithoutFeedback onPress={() => setPopupVisible(false)}>
+          <View style={styles.popupContainer}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setPopupVisible(false)}
+            >
+              <Ionicons name="close" size={44} color="#fff" />
+            </TouchableOpacity>
+            {/* Display random message in the popup */}
+            <Text style={styles.popupText}>{getRandomMessage()}</Text>
+          </View>
+        </TouchableWithoutFeedback>
       )}
     </View>
   );
@@ -324,11 +379,11 @@ const styles = StyleSheet.create({
   },
   flipButton: {
     position: "absolute",
-    top: 16,
-    right: 16,
+    top: 56,
+    right: 20,
     padding: 12,
     borderRadius: 50,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    // backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   takeStopVideoButton: {
     position: "absolute",
@@ -336,7 +391,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     padding: 12,
     borderRadius: 50,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    // backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   backButton: {
     position: "absolute",
@@ -402,5 +457,43 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 5,
     marginBottom: 10,
+  },
+  popupButton: {
+    position: "absolute",
+    top: 130,
+    right: 30,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    // backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
+  },
+  popupContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 2,
+  },
+  closeButton: {
+    position: "absolute",
+    top: 70,
+    right: 370,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    // backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  popupText: {
+    color: "#fff",
+    fontSize: 18,
   },
 });
