@@ -29,14 +29,16 @@ For each folder, install the required dependencies using the following command:
 
 Start the frontend and backend servers using the following commands:
 
+Backend:
 - nodemon app.js
 
-The frontend will generate a QR code that can be scanned using the Expo Go app on your mobile device to test the app on a physical device or use the web option for testing in a web browser. use the following command based on your device:
-
+Frontend:
 - yarn start
 - yarn android
 - yarn ios
 - yarn web
+
+The frontend will generate a QR code that can be scanned using the Expo Go app on your mobile device to test the app on a physical device or use the web option for testing in a web browser.
 
 Start exploring Diall's features!
 
