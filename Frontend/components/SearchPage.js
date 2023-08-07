@@ -8,30 +8,45 @@ import {
 } from "react-native";
 import axios from "axios";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
 
 const SearchPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const navigation = useNavigation(); // Get the navigation object
+  const isFocused = useIsFocused(); // Check if the component is focused
+
+  const fetchData = async (searchTerm) => {
+    try {
+      const response = await axios.get(
+        "http://192.168.5.48:3000/api/therapists/",
+        {
+          params: {
+            search: searchTerm,
+          },
+        }
+      );
+      const therapistData = response.data.therapists;
+
+      // Filter therapists whose names start with the search term
+      const filteredTherapists = therapistData.filter((therapist) =>
+        therapist.username.toLowerCase().startsWith(searchTerm.toLowerCase())
+      );
+
+      setSearchResults(filteredTherapists);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get("API_URL");
-        const therapistData = response.data; // Assuming the response is an array of therapist data
+    fetchData(searchTerm);
+  }, [searchTerm, isFocused]); // Fetch data when searchTerm or component focus changes
 
-        // Filter therapists whose names start with the search term
-        const filteredTherapists = therapistData.filter((therapist) =>
-          therapist.name.toLowerCase().startsWith(searchTerm.toLowerCase())
-        );
-
-        setSearchResults(filteredTherapists);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchData();
-  }, [searchTerm]);
+  const handleAskPress = () => {
+    // Navigate to the "Ask" page when the "Ask" button is pressed
+    navigation.navigate("Ask");
+  };
 
   const handleClearSearch = () => {
     setSearchTerm("");
@@ -60,10 +75,16 @@ const SearchPage = () => {
       </View>
       {/* Display the search results */}
       <View style={styles.resultsContainer}>
-        {searchResults.map((therapist, index) => (
-          <Text key={index} style={styles.therapistName}>
-            {therapist.name}
-          </Text>
+        {searchResults.map((therapist) => (
+          <View key={therapist.userID} style={styles.therapistItem}>
+            <View style={styles.therapistInfo}>
+              <Text style={styles.therapistName}>{therapist.username}</Text>
+              <Text style={styles.therapistKeywords}>{therapist.keywords}</Text>
+            </View>
+            <TouchableOpacity style={styles.askButton} onPress={handleAskPress}>
+              <Text style={styles.askButtonText}>Ask</Text>
+            </TouchableOpacity>
+          </View>
         ))}
       </View>
     </View>
@@ -106,9 +127,34 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 20,
   },
+  therapistItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderColor: "#ddd",
+  },
+  therapistInfo: {
+    flex: 1,
+  },
   therapistName: {
-    fontSize: 16,
-    marginBottom: 10,
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  therapistKeywords: {
+    fontSize: 14,
+    color: "#888",
+  },
+  askButton: {
+    backgroundColor: "green",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+  },
+  askButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
 });
 
