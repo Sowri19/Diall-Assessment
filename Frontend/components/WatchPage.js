@@ -19,7 +19,7 @@ const WatchPage = () => {
   const [videoFeed, setVideoFeed] = useState([]);
   const currentIndex = useRef(0);
   const swiperRef = useRef(null);
-
+  const [focusedIndex, setFocusedIndex] = useState(0);
   const bottomTabBarHeight = 79;
 
   const fetchVideoFeed = async () => {
@@ -41,6 +41,7 @@ const WatchPage = () => {
   }, [isFocused]);
   const handleSwipe = ({ index }) => {
     currentIndex.current = index;
+    setFocusedIndex(index);
     console.log("currentIndex", currentIndex.current);
   };
 
@@ -68,16 +69,21 @@ const WatchPage = () => {
 
   const VideoItem = ({ item, index, handleSharePress }) => {
     const videoRef = useRef(null);
-    const [isPlaying, setIsPlaying] = useState(true);
+    const [isPlaying, setIsPlaying] = useState(index === focusedIndex);
+
     useEffect(() => {
       (async () => {
         try {
-          await videoRef.current.playAsync();
+          if (isPlaying) {
+            await videoRef.current.playAsync();
+          } else {
+            await videoRef.current.pauseAsync();
+          }
         } catch (error) {
-          console.error("Error playing video:", error);
+          console.error("Error handling video play/pause:", error);
         }
       })();
-    }, []);
+    }, [isPlaying]);
 
     const handleVideoTap = async () => {
       if (videoRef.current) {
@@ -165,6 +171,7 @@ const WatchPage = () => {
         vertical={true}
         showPagination={false}
         onMomentumScrollEnd={endSwipe}
+        focusedIndex={focusedIndex}
       />
     </View>
   );
