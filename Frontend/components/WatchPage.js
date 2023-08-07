@@ -25,7 +25,10 @@ const WatchPage = () => {
   const fetchVideoFeed = async () => {
     try {
       const response = await axios.get("http://192.168.5.48:3000/api/videos/");
-      setVideoFeed(response.data.videos);
+      const sortedVideos = response.data.videos.sort(
+        (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+      );
+      setVideoFeed(sortedVideos);
     } catch (error) {
       console.error("Error fetching video feed:", error);
     }

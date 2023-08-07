@@ -62,7 +62,10 @@ class Video {
   // Fetch all videos from the Firestore collection
   static async getAllVideos() {
     try {
-      const videosRef = await db.collection("videos").get();
+      const videosRef = await db
+        .collection("videos")
+        .orderBy("createdAt", "desc")
+        .get();
       const allVideos = [];
 
       videosRef.forEach((videoSnapshot) => {
