@@ -51,3 +51,16 @@ This Model is used to store the therapist data in the database. The therapist da
 
 In this model also, the userID, username are mandatory fields, But the profile picture and keywords are optional, as the user can choose to not upload a profile picture and keywords, it is optional in a thought of he can upload it later once he logs in and wants to create his user profile.
 As of now the therapist has no authentication created not implemented, so the therapist profile is not connected to the video model, but once the authentication is created, the therapist profile will be connected to the video model, so that the therapist can access the videos that he has been asked to review.
+
+
+
+- Backend:
+  - Node.js
+  - Express.js
+  - Firebase Admin SDK
+  - body-parser
+  - cors
+  - dotenv
+  - multer
+  - nodemon
+  - uuid
