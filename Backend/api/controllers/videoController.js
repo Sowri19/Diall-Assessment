@@ -72,7 +72,7 @@ const createVideo = async (req, res, next) => {
 
     // Get the next available video ID from Firestore
     const nextVideoKey = await getNextVideoKey();
-
+    // We can also choose to use uuid for the for the id, instead I used custom key for id.
     // Save the video data in Firestore database with the custom key named "id"
     const videoData = {
       id: nextVideoKey,
@@ -83,6 +83,7 @@ const createVideo = async (req, res, next) => {
       therapistVideo: therapistVideo || null,
       createdAt: admin.firestore.Timestamp.now(),
     };
+    // All the null values are optional here,
 
     // Create a new video document in Firestore
     const videoRef = await db.collection("videos").add(videoData);
@@ -96,6 +97,7 @@ const createVideo = async (req, res, next) => {
     next(error);
   }
 };
+// we can use get video by ID in the single profile page of the users/ therapist to retrieve the their video.
 // Controller to fetch a video by its ID
 const getVideoByID = async (req, res, next) => {
   try {

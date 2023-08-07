@@ -10,7 +10,7 @@ async function uploadProfilePic(profilePicBuffer) {
     const profilePicFilename = uuidv4(); // Generate a unique filename for the profile pic
     const profilePicFileRef = storageBucket.file(profilePicFilename);
 
-    // Upload the profile pic file to the storage bucket
+    // Upload the profile pic file to the storage bucket: this im not using as of now.
     await profilePicFileRef.save(profilePicBuffer, {
       metadata: {
         contentType: "image/jpeg", // Change the content type as per your image type

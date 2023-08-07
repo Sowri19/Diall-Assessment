@@ -12,6 +12,7 @@ router.post(
   upload.fields([{ name: "userVideo" }, { name: "therapistVideo" }]),
   videoController.createVideo
 );
+
 // Route to fetch all videos
 router.get("/", videoController.getAllVideos);
 
