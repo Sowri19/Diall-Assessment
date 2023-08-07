@@ -43,7 +43,7 @@ Start exploring Diall's features!
 Navigate to backend or frontend folder and check the readme file for more information.
 
 ## Features
-- Personalized Home Feed: Upon logging in, users are presented with a personalized home feed that includes helpful mental health content, self-assessment tools, and questions from the community.
+- Personalized Home Feed: Upon logging in, users are presented with a personalized home feed that includes helpful mental health content
 
 - Video Recording and Upload: Diall allows users to record and upload videos to share their emotions, experiences, and progress with their therapists, facilitating a more personalized therapy experience.
   
