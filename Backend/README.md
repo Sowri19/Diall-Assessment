@@ -53,7 +53,7 @@ In this model also, the userID, username are mandatory fields, But the profile p
 As of now the therapist has no authentication created not implemented, so the therapist profile is not connected to the video model, but once the authentication is created, the therapist profile will be connected to the video model, so that the therapist can access the videos that he has been asked to review.
 
 
-
+## Technologies Used:
 - Backend:
   - Node.js
   - Express.js

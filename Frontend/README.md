@@ -8,7 +8,7 @@ Diall Assessment
   - [Getting Started](#getting-started)
   - [Features](#features)
   - [Technologies Used](#technologies-used)
-  - [Implementation](#implementation)
+- [Implementation](#implementation)
   - [Watch Page](#watch-page)
     - [Video Feed Retrieval](#video-feed-retrieval)
     - [SwiperFlatList Implementation](#swiperflatlist-implementation)
@@ -39,6 +39,14 @@ Diall Assessment
     - [Search Tab](#search-tab)
     - [Header and Label Visibility](#header-and-label-visibility)
     - [Navigation Flow](#navigation-flow)
+  - [Search Page](#search-page)
+    - [Search Bar](#search-bar)
+    - [Fetching and Displaying Search Results](#fetching-and-displaying-search-results)
+    - [Therapist Information Display](#therapist-information-display)
+    - [Ask Button](#ask-button)
+    - [Search Functionality](#search-functionality)
+    - [Styling](#styling-1)
+    - [Navigation](#navigation-1)
 
 ## Getting Started
    Read the main README.md file for the instructions on how to run the project.
@@ -85,8 +93,7 @@ Diall Assessment
   - react-native-web
   - react-navigation
 
-## Implementation
-Implemented the watch view:
+# Implementation
 
 ## Watch Page
 ### Video Feed Retrieval
@@ -205,3 +212,46 @@ Implemented the watch view:
 
 ### Navigation Flow
 - Users can switch between tabs to access different sections of the app, such as watching videos, asking questions, and searching content.
+
+
+## Search Page
+
+### Search Bar
+
+- The search bar allows users to enter search terms to find therapists.
+- Placeholder text guides users on what to search for.
+- Users can clear the search term using the "x" button.
+
+### Fetching and Displaying Search Results
+
+- The app fetches therapist data from the server using the Axios library and the provided API endpoint.
+- Therapists whose names start with the search term are filtered and displayed as search results.
+- The search results are shown in a stacked horizontal layout.
+- Each search result displays the therapist's profile image, username, and keywords.
+
+### Therapist Information Display
+
+- A round profile image is displayed beside the therapist's name and keywords.
+- The therapist's name is displayed in a larger, bold font to emphasize it.
+- Keywords associated with the therapist are displayed below their name.
+
+### Ask Button
+
+- Each therapist search result has an "Ask" button.
+- When the "Ask" button is pressed, the user is navigated to the "Ask" page.
+
+### Search Functionality
+
+- The therapist search is case-insensitive, allowing users to search for therapists regardless of the case used.
+- As the user types in the search bar, the app dynamically updates the search results.
+
+### Styling
+
+- Custom styles are used to layout and design the search bar and search results.
+- The search bar has a light grey background and is placed at the top of the page.
+- The search results are displayed below the search bar with appropriate spacing and borders.
+- The "Ask" button is styled with a green background and white bold text.
+
+### Navigation
+
+- The app uses the `useNavigation` hook from the `@react-navigation/native` library to navigate to the "Ask" page when the "Ask" button is pressed.
