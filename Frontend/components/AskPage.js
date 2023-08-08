@@ -99,36 +99,6 @@ export default function App() {
     setRecord(null);
   };
 
-  // const handleVideoUpload = async () => {
-  //   if (videoTitle.trim() === "") {
-  //     alert("Title is mandatory. Please enter a title for the video.");
-  //     return;
-  //   }
-
-  //   try {
-  //     const formData = new FormData();
-  //     formData.append("video", {
-  //       uri: userRecord,
-  //       type: "video/mp4",
-  //       name: "video-file.mp4",
-  //     });
-  //     formData.append("title", videoTitle);
-  //     formData.append("therapistName", "Your therapist name"); // Replace with the actual therapist name
-  //     formData.append("createdBy", "Your username or user ID"); // Replace with the actual creator's username or ID
-
-  //     const response = await fetch("http://192.168.5.48:3000/api/videos/", {
-  //       method: "POST",
-  //       body: formData,
-  //     });
-
-  //     // Handle the response from the backend if needed
-  //     const data = await response.json();
-  //     console.log("Upload response:", data);
-  //   } catch (error) {
-  //     console.error("Error uploading video:", error);
-  //   }
-  // };
-
   const handleVideoUpload = async () => {
     if (videoTitle.trim() === "") {
       alert("Title is mandatory. Please enter a title for the video.");
