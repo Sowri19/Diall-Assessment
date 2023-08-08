@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  Image,
 } from "react-native";
 import axios from "axios";
 import { Ionicons } from "@expo/vector-icons";
@@ -78,8 +79,19 @@ const SearchPage = () => {
         {searchResults.map((therapist) => (
           <View key={therapist.userID} style={styles.therapistItem}>
             <View style={styles.therapistInfo}>
-              <Text style={styles.therapistName}>{therapist.username}</Text>
-              <Text style={styles.therapistKeywords}>{therapist.keywords}</Text>
+              <View style={styles.horizontalContainer}>
+                {/* Round profile image */}
+                <Image
+                  style={styles.profileImage}
+                  source={{ uri: therapist.profilePic }}
+                />
+                <View style={styles.textContainer}>
+                  <Text style={styles.therapistName}>{therapist.username}</Text>
+                  <Text style={styles.therapistKeywords}>
+                    {therapist.keywords}
+                  </Text>
+                </View>
+              </View>
             </View>
             <TouchableOpacity style={styles.askButton} onPress={handleAskPress}>
               <Text style={styles.askButtonText}>Ask</Text>
@@ -155,6 +167,22 @@ const styles = StyleSheet.create({
   askButtonText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  // Style for the profile image
+  profileImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 10,
+  },
+
+  horizontalContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  textContainer: {
+    flexDirection: "column",
   },
 });
 
