@@ -6,7 +6,6 @@ Diall Assessment
 - [Project Name](#project-name)
   - [Table of Contents](#table-of-contents)
   - [Getting Started](#getting-started)
-  - [Features](#features)
   - [Technologies Used](#technologies-used)
 - [Implementation](#implementation)
   - [Watch Page](#watch-page)
@@ -50,10 +49,6 @@ Diall Assessment
 
 ## Getting Started
    Read the main README.md file for the instructions on how to run the project.
-## Features
-
-[Describe the main features of your project. Highlight key functionalities and any unique aspects.]
-
 ## Technologies Used
 - Frontend:
   - React Native
